@@ -31,6 +31,9 @@ const checkArgs = () => {
 };
 
 const execute = async () => {
+  console.clear();
+  const appVersion = JSON.parse(fs.readFileSync("./package.json"))["version"];
+  utils.print(`Strava Gear Updater v${appVersion}`);
   if (!checkArgs()) {
     return 1;
   }
