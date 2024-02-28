@@ -1,0 +1,15 @@
+{
+  "name": "strava-thing",
+  "version": "1.0.0",
+  "description": "",
+  "main": "GearUpdater.js",
+  "scripts": {
+    "start": "node App.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "crypto-js": "^4.2.0",
+    "strava-v3": "^2.2.0"
+  }
+}
