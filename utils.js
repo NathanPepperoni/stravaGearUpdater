@@ -15,6 +15,7 @@ const getArgs = () => {
   let refreshToken;
   let clientId;
   let clientSecret;
+  let dateLimit;
   process.argv.forEach((arg) => {
     const argString = arg.toLowerCase();
     if (argString.includes("--aeskey=")) {
@@ -29,6 +30,9 @@ const getArgs = () => {
     if (argString.includes("--refreshtoken=")) {
       refreshToken = argString.replace("--refreshtoken=", "");
     }
+    if (argString.includes("--datelimit=")) {
+      dateLimit = argString.replace("--datelimit=", "");
+    }
   });
 
   return {
@@ -36,6 +40,7 @@ const getArgs = () => {
     clientId: clientId,
     clientSecret: clientSecret,
     refreshToken: refreshToken,
+    dateLimit: dateLimit,
   };
 };
 

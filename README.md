@@ -30,6 +30,9 @@ This is located in the same place as your client ID in strava.
 #### --aesKey
 This is used to encrypt the refresh token when saving it to disk. It should be cryptographically secure string sequence.
 
+#### --dateLimit
+This is use to set a time (a unix epoch time in ms) that the gear updater will never go beyond when processing files. If the program ever tries to process an activity older than this limit, it will error out and not continue to process anything, with the goal being to not mess up any strava history from before you started using devices and gear together in the way outlined in your gear.config. Optional, but highly recommended (ask my how I know).
+
 #### --refreshToken
 This is only required if the application has not been run before. After the first run, the gear updater will store the refresh token automatically, as well as automatically renew and update it as the tokens expire. The refresh token you provide should have the following scopes:
 `activity:write` (to update the activities with the appropriate gear_id),`activity:read_all` (to retrieve the device_name from the activity), and `profile:read_all` (to obtain a bulk list of the users activities).

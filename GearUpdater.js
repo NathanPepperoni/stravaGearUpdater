@@ -4,13 +4,9 @@ const utils = require("./utils.js");
 
 const LAST_KNOWN_ID_KEY = "lastKnownID";
 
-/**
- * The epoch time of the day you want the script to stop. The script won't process activities from before this datetime.
- */
-const dateBackup = 1706338800000;
-
 class GearUpdater {
   constructor(gearConfig, lastKnownID, refreshToken, tokenExpiration) {
+    this.dateLimit = Number.parseInt(utils.getArgs().dateLimit) ?? 0;
     this.gearConfig = gearConfig;
     this.storage = new Storage();
     this.stravaDAL = new StravaDAL(refreshToken, tokenExpiration);
@@ -30,9 +26,9 @@ class GearUpdater {
         utils.print(error);
       }
       for (let i = 0; i < payloadActivities.length; i++) {
-        if (Date.parse(payloadActivities[i].start_date) <= dateBackup) {
+        if (Date.parse(payloadActivities[i].start_date) <= this.dateLimit) {
           throw new Error(
-            "Backup date reached. Please check the last known id in storage."
+            "Backup date reached. Please check the lastKnownID in storage.json."
           );
         }
         if (payloadActivities[i].id === this.lastKnownID) {
