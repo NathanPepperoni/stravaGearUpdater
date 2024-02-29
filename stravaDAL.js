@@ -44,7 +44,7 @@ class StravaDAL {
 
   async getLatestStravaClient() {
     const tokenHasExpired =
-      !this.tokenExpiration && Date.now() >= this.tokenExpiration;
+      !this.tokenExpiration && Date.now() / 1000 >= this.tokenExpiration;
 
     if (!this.accessToken || tokenHasExpired) {
       const refreshResponse = await strava.oauth.refreshToken(
