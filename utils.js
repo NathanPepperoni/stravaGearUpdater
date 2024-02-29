@@ -18,15 +18,6 @@ const getArgs = () => {
   let dateLimit;
   process.argv.forEach((arg) => {
     const argString = arg.toLowerCase();
-    if (argString.includes("--aeskey=")) {
-      aesKey = argString.replace("-aeskey=", "");
-    }
-    if (argString.includes("--clientid=")) {
-      clientId = argString.replace("--clientid=", "");
-    }
-    if (argString.includes("--clientsecret=")) {
-      clientSecret = argString.replace("--clientsecret=", "");
-    }
     if (argString.includes("--refreshtoken=")) {
       refreshToken = argString.replace("--refreshtoken=", "");
     }

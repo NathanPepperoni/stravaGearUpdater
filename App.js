@@ -6,23 +6,22 @@ const utils = require("./utils.js");
 
 const POLL_RATE = 60000;
 
-const checkArgs = () => {
-  const args = utils.getArgs();
-  const missingArgs = [];
-  if (!args.clientId) {
-    missingArgs.push("--clientId");
+const checkEnvs = (clientId, clientSecret, aesKey) => {
+  const missingEnvs = [];
+  if (!clientId) {
+    missingEnvs.push("STRAVA_CLIENT_ID");
   }
-  if (!args.clientSecret) {
-    missingArgs.push("--clientSecret");
+  if (!clientSecret) {
+    missingEnvs.push("STRAVA_CLIENT_SECRET");
   }
-  if (!args.aesKey) {
-    missingArgs.push("--aesKey");
+  if (!aesKey) {
+    missingEnvs.push("GEAR_UPDATER_AES_KEY");
   }
 
-  if (missingArgs.length > 0) {
-    utils.print("Missing the following required arguments:");
-    for (let i = 0; i < missingArgs.length; i++) {
-      utils.print(`    ${missingArgs[i]}`);
+  if (missingEnvs.length > 0) {
+    utils.print("Missing the following required environment variables:");
+    for (let i = 0; i < missingEnvs.length; i++) {
+      utils.print(`    ${missingEnvs[i]}`);
     }
     return false;
   }
@@ -31,10 +30,14 @@ const checkArgs = () => {
 };
 
 const execute = async () => {
-  console.clear();
   const appVersion = JSON.parse(fs.readFileSync("./package.json"))["version"];
   utils.print(`Strava Gear Updater v${appVersion}`);
-  if (!checkArgs()) {
+
+  const clientId = process.env.STRAVA_CLIENT_ID;
+  const clientSecret = process.env.STRAVA_CLIENT_SECRET;
+  const aesKey = process.env.GEAR_UPDATER_AES_KEY;
+
+  if (!checkEnvs(clientId, clientSecret, aesKey)) {
     return 1;
   }
 
@@ -71,26 +74,26 @@ const execute = async () => {
 
   utils.print("listening for new activities...");
   setInterval(async () => {
-    const newActivities = await gearUpdater.fetchActivitiesToUpdate();
+  const newActivities = await gearUpdater.fetchActivitiesToUpdate();
 
-    if (newActivities.length === 0) {
-      return;
-    }
+  if (newActivities.length === 0) {
+    return;
+  }
 
-    utils.print(
-      `New ${
-        newActivities.length > 1 ? "activities" : "activity"
-      } found! processing...`
-    );
+  utils.print(
+    `New ${
+      newActivities.length > 1 ? "activities" : "activity"
+    } found! processing...`
+  );
 
-    for (const activity of newActivities) {
-      await gearUpdater.processActivity(activity.id);
-    }
+  for (const activity of newActivities) {
+    await gearUpdater.processActivity(activity.id);
+  }
 
-    utils.print(
-      `${newActivities.length > 1 ? "Activities" : "Activity"} processed!`
-    );
-    utils.print("listening for new activities...");
+  utils.print(
+    `${newActivities.length > 1 ? "Activities" : "Activity"} processed!`
+  );
+  utils.print("listening for new activities...");
   }, POLL_RATE);
 };
 

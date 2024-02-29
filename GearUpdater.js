@@ -20,11 +20,7 @@ class GearUpdater {
     let page = 1;
     this.lastKnownID = await this.storage.getKey(LAST_KNOWN_ID_KEY);
     do {
-      try {
-        payloadActivities = await this.stravaDAL.listActivities(page++, 10);
-      } catch (error) {
-        utils.print(error);
-      }
+      payloadActivities = await this.stravaDAL.listActivities(page++, 10);
       for (let i = 0; i < payloadActivities.length; i++) {
         if (Date.parse(payloadActivities[i].start_date) <= this.dateLimit) {
           throw new Error(

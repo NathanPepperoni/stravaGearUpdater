@@ -1,5 +1,4 @@
 const strava = require("strava-v3");
-const utils = require("./utils.js");
 const Storage = require("./Storage.js");
 
 const TOKEN_EXPIRATION_KEY = "tokenExpiration";
@@ -10,9 +9,8 @@ class StravaDAL {
     this.accessToken;
     this.refreshToken = refreshToken;
     this.tokenExpiration = tokenExpiration;
-    const args = utils.getArgs();
-    this.clientId = args.clientId;
-    this.clientSecret = args.clientSecret;
+    this.clientId = process.env.STRAVA_CLIENT_ID;
+    this.clientSecret = process.env.STRAVA_CLIENT_SECRET;
     strava.config({
       access_token: this.accessToken,
       client_id: this.clientId,

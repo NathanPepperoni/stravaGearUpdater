@@ -5,7 +5,7 @@ const utils = require("./utils.js");
 
 class Storage {
   constructor() {
-    this.aesKey = utils.getArgs().aesKey;
+    this.aesKey = process.env.GEAR_UPDATER_AES_KEY;
   }
 
   // TODO debounce this if Im ever worried about disk writes
