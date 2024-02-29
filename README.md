@@ -1,5 +1,5 @@
-# stravaGearUpdater
-Automatically update the gear on activities based on device name.
+# Strava Gear Updater
+Automatically updated the gear on Strava activities based on the device name on the activity.
 
 ## How to use the strava gear updater
 
