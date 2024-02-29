@@ -57,7 +57,7 @@ const execute = async () => {
   const storage = new Storage();
   const lastKnownID = await storage.getKey(LAST_KNOWN_ID_KEY);
   const refreshToken =
-    (await storage.retrieveRefreshToken()) || utils.getArgs().refreshToken;
+    utils.getArgs().refreshToken || (await storage.retrieveRefreshToken());
   if (!refreshToken) {
     throw new Error(
       "No refresh token found. If this is the first execution, please provide the latest refresh token via the -refreshToken flag."
@@ -74,26 +74,26 @@ const execute = async () => {
 
   utils.print("listening for new activities...");
   setInterval(async () => {
-  const newActivities = await gearUpdater.fetchActivitiesToUpdate();
+    const newActivities = await gearUpdater.fetchActivitiesToUpdate();
 
-  if (newActivities.length === 0) {
-    return;
-  }
+    if (newActivities.length === 0) {
+      return;
+    }
 
-  utils.print(
-    `New ${
-      newActivities.length > 1 ? "activities" : "activity"
-    } found! processing...`
-  );
+    utils.print(
+      `New ${
+        newActivities.length > 1 ? "activities" : "activity"
+      } found! processing...`
+    );
 
-  for (const activity of newActivities) {
-    await gearUpdater.processActivity(activity.id);
-  }
+    for (const activity of newActivities) {
+      await gearUpdater.processActivity(activity.id);
+    }
 
-  utils.print(
-    `${newActivities.length > 1 ? "Activities" : "Activity"} processed!`
-  );
-  utils.print("listening for new activities...");
+    utils.print(
+      `${newActivities.length > 1 ? "Activities" : "Activity"} processed!`
+    );
+    utils.print("listening for new activities...");
   }, POLL_RATE);
 };
 
