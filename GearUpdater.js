@@ -39,7 +39,7 @@ class GearUpdater {
   }
 
   async processActivity(activityId) {
-    console.log(`Processing activity ${activityId}...`);
+    utils.print(`Processing activity ${activityId}...`);
     const activity = await this.stravaDAL.getActivity(activityId);
 
     if (activityId > this.lastKnownID) {
