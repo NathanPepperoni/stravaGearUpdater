@@ -4,7 +4,7 @@ const { TOKEN_EXPIRATION_KEY, StravaDAL } = require("./stravaDAL.js");
 const Storage = require("./Storage.js");
 const utils = require("./utils.js");
 
-const POLL_RATE = 60000;
+const POLL_RATE = 180000;
 
 const checkEnvs = (clientId, clientSecret, aesKey) => {
   const missingEnvs = [];
