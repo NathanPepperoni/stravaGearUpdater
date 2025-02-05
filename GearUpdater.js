@@ -4,6 +4,8 @@ const utils = require("./utils.js");
 
 const LAST_KNOWN_ID_KEY = "lastKnownID";
 
+const DOG_WALK_GEAR_ID = "b9634768";
+
 class GearUpdater {
   constructor(gearConfig, lastKnownID, refreshToken, tokenExpiration) {
     this.dateLimit = Number.parseInt(utils.getArgs().dateLimit) ?? 0;
@@ -20,7 +22,12 @@ class GearUpdater {
     let page = 1;
     this.lastKnownID = await this.storage.getKey(LAST_KNOWN_ID_KEY);
     do {
-      payloadActivities = await this.stravaDAL.listActivities(page++, 10);
+      try {
+        payloadActivities = await this.stravaDAL.listActivities(page++, 10);
+      } catch {
+        utils.print("Unable to connect to Strava. Will try again in 2 minutes.");
+        continue;
+      }
       for (let i = 0; i < payloadActivities.length; i++) {
         if (Date.parse(payloadActivities[i].start_date) <= this.dateLimit) {
           throw new Error(
@@ -38,25 +45,78 @@ class GearUpdater {
     return activities.reverse();
   }
 
+  getExpectedGearIdForDevice(availableMetrics, deviceName) {
+    const gearConfigItem = this.gearConfig.find(
+      (config) => config.deviceName === deviceName
+    );
+
+    if (!gearConfigItem) {
+      return undefined;
+    }
+
+    const conditionalMetrics = gearConfigItem.conditionalMetrics ?? [];
+
+    const conditionsAreMet = !conditionalMetrics.some(
+      (metric) => !availableMetrics.includes(metric)
+    );
+
+    if (conditionsAreMet) {
+      return gearConfigItem.gearId;
+    } else {
+      return gearConfigItem.fallbackGearId;
+    }
+  }
+
+  getTitleOverride(gearId, activity) {
+    if (gearId !== DOG_WALK_GEAR_ID) {
+      return undefined;
+    }
+
+    if (activity.average_speed < 8 && activity.distance < 10000) {
+      return "🐕🚲";
+    }
+    return undefined;
+  }
+
+  getActivityMetrics(activity) {
+    const activityMetrics = [];
+    if (activity.device_watts) {
+      activityMetrics.push("power");
+    }
+    if (activity.has_heartrate) {
+      activityMetrics.push("heartrate");
+    }
+    return activityMetrics;
+  }
+
   async processActivity(activityId) {
     utils.print(`Processing activity ${activityId}...`);
     const activity = await this.stravaDAL.getActivity(activityId);
+    const activityMetrics = this.getActivityMetrics(activity);
+    const expectedGearId = this.getExpectedGearIdForDevice(
+      activityMetrics,
+      activity.device_name
+    );
+
+    if (!expectedGearId) {
+      utils.print(
+        `Activity ${activityId} did not have a configured device name.`
+      );
+      return;
+    }
+
+    const titleOverride = this.getTitleOverride(expectedGearId, activity);
+
+    if (activity.gear_id !== expectedGearId) {
+      await this.stravaDAL.updateGearOnActivity(
+        activity,
+        expectedGearId,
+        titleOverride
+      );
+    }
 
     if (activityId > this.lastKnownID) {
       await this.storage.updateKey(LAST_KNOWN_ID_KEY, activityId);
-    }
-
-    for (let i = 0; i < this.gearConfig.length; i++) {
-      if (
-        activity.device_name === this.gearConfig[i].deviceName &&
-        activity.gear_id !== this.gearConfig[i].gearId
-      ) {
-        await this.stravaDAL.updateGearOnActivity(
-          activity,
-          this.gearConfig[i].gearId
-        );
-        return;
-      }
     }
   }
 }

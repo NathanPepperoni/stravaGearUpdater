@@ -20,12 +20,20 @@ class StravaDAL {
     this.stravaClient = new strava.client(this.accessToken);
   }
 
-  async updateGearOnActivity(activity, gearId) {
+  async updateGearOnActivity(activity, gearId, titleOverride) {
     const client = await this.getLatestStravaClient();
-    await client.activities.update({
-      id: activity.id,
-      gear_id: gearId,
-    });
+    if (titleOverride) {
+      await client.activities.update({
+        id: activity.id,
+        gear_id: gearId,
+        name: titleOverride,
+      });
+    } else {
+      await client.activities.update({
+        id: activity.id,
+        gear_id: gearId,
+      });
+    }
     await this.storage.logUpdate(activity.id, activity.gear_id, gearId);
   }
 
@@ -44,7 +52,8 @@ class StravaDAL {
 
   async getLatestStravaClient() {
     const tokenHasExpired =
-      !this.tokenExpiration || Date.now() / 1000 >= this.tokenExpiration;
+      !this.tokenExpiration ||
+      Math.ceil(Date.now() / 1000) >= this.tokenExpiration;
     if (!this.accessToken || tokenHasExpired) {
       const refreshResponse = await strava.oauth.refreshToken(
         this.refreshToken

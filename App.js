@@ -29,6 +29,29 @@ const checkEnvs = (clientId, clientSecret, aesKey) => {
   return true;
 };
 
+const fetchAndProcessActivites = async (gearUpdater) => {
+  const newActivities = await gearUpdater.fetchActivitiesToUpdate();
+
+  if (newActivities.length === 0) {
+    return;
+  }
+
+  utils.print(
+    `New ${
+      newActivities.length > 1 ? "activities" : "activity"
+    } found! processing...`
+  );
+
+  for (const activity of newActivities) {
+    await gearUpdater.processActivity(activity.id);
+  }
+
+  utils.print(
+    `${newActivities.length > 1 ? "Activities" : "Activity"} processed!`
+  );
+  utils.print("listening for new activities...");
+};
+
 const execute = async () => {
   const appVersion = JSON.parse(fs.readFileSync("./package.json"))["version"];
   utils.print(`Strava Gear Updater v${appVersion}`);
@@ -73,27 +96,18 @@ const execute = async () => {
   );
 
   utils.print("listening for new activities...");
+  await fetchAndProcessActivites(gearUpdater);
   setInterval(async () => {
-    const newActivities = await gearUpdater.fetchActivitiesToUpdate();
-
-    if (newActivities.length === 0) {
-      return;
+    try {
+      await fetchAndProcessActivites(gearUpdater);
+    } catch (error) {
+      const statusCodeCategory = error.message.substring(0, 1);
+      if (statusCodeCategory === "5") {
+        utils.print("Strava server error, will retry request.");
+      } else {
+        throw error;
+      }
     }
-
-    utils.print(
-      `New ${
-        newActivities.length > 1 ? "activities" : "activity"
-      } found! processing...`
-    );
-
-    for (const activity of newActivities) {
-      await gearUpdater.processActivity(activity.id);
-    }
-
-    utils.print(
-      `${newActivities.length > 1 ? "Activities" : "Activity"} processed!`
-    );
-    utils.print("listening for new activities...");
   }, POLL_RATE);
 };
 
