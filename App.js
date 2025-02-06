@@ -29,11 +29,24 @@ const checkEnvs = (clientId, clientSecret, aesKey) => {
   return true;
 };
 
-const fetchAndProcessActivites = async (gearUpdater) => {
-  const newActivities = await gearUpdater.fetchActivitiesToUpdate();
+const fetchAndProcessActivites = async (gearUpdater, stravaConnected) => {
+  let newActivities = [];
+  try {
+    newActivities = await gearUpdater.fetchActivitiesToUpdate();
+    if (!stravaConnected) {
+      utils.print("Connection to Strava restored. Listening for new activities...");
+    }
+  } catch (error) {
+    utils.print(
+      `${error.message} Will try again in approximately ${Math.round(
+        POLL_RATE / 60000
+      )} minute(s).`
+    );
+    return false;
+  }
 
   if (newActivities.length === 0) {
-    return;
+    return true;
   }
 
   utils.print(
@@ -50,6 +63,7 @@ const fetchAndProcessActivites = async (gearUpdater) => {
     `${newActivities.length > 1 ? "Activities" : "Activity"} processed!`
   );
   utils.print("listening for new activities...");
+  return true;
 };
 
 const execute = async () => {
@@ -95,11 +109,11 @@ const execute = async () => {
     tokenExpiration
   );
 
-  utils.print("listening for new activities...");
-  await fetchAndProcessActivites(gearUpdater);
+  let stravaConnected = false;
+  stravaConnected = await fetchAndProcessActivites(gearUpdater, stravaConnected);
   setInterval(async () => {
     try {
-      await fetchAndProcessActivites(gearUpdater);
+      stravaConnected = await fetchAndProcessActivites(gearUpdater, stravaConnected);
     } catch (error) {
       const statusCodeCategory = error.message.substring(0, 1);
       if (statusCodeCategory === "5") {

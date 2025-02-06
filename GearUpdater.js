@@ -25,8 +25,7 @@ class GearUpdater {
       try {
         payloadActivities = await this.stravaDAL.listActivities(page++, 10);
       } catch {
-        utils.print("Unable to connect to Strava. Will try again in 2 minutes.");
-        continue;
+        throw new Error("Unable to connect to Strava.");
       }
       for (let i = 0; i < payloadActivities.length; i++) {
         if (Date.parse(payloadActivities[i].start_date) <= this.dateLimit) {
