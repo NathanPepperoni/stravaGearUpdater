@@ -38,7 +38,7 @@ const fetchAndProcessActivites = async (gearUpdater, stravaConnected) => {
     }
   } catch (error) {
     utils.print(
-      `${error.message} Will try again in approximately ${Math.round(
+      `${error.message}\n\nWill try again in approximately ${Math.round(
         POLL_RATE / 60000
       )} minute(s).`
     );
@@ -68,7 +68,7 @@ const fetchAndProcessActivites = async (gearUpdater, stravaConnected) => {
 
 const execute = async () => {
   const appVersion = JSON.parse(fs.readFileSync("./package.json"))["version"];
-  utils.print(`Strava Gear Updater v${appVersion}`);
+  utils.print(`Strava Gear Updater v${appVersion}\n`);
 
   const clientId = process.env.STRAVA_CLIENT_ID;
   const clientSecret = process.env.STRAVA_CLIENT_SECRET;
