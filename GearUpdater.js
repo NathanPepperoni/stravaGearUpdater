@@ -25,7 +25,9 @@ class GearUpdater {
       try {
         payloadActivities = await this.stravaDAL.listActivities(page++, 10);
       } catch (error) {
-        throw new Error(`Unable to connect to Strava.\n\nerror:\n${error.message}`);
+        throw new Error(
+          `Unable to connect to Strava.\n\nerror:\n${error.message}`
+        );
       }
       for (let i = 0; i < payloadActivities.length; i++) {
         if (Date.parse(payloadActivities[i].start_date) <= this.dateLimit) {
@@ -101,12 +103,10 @@ class GearUpdater {
       utils.print(
         `Activity ${activityId} did not have a configured device name.`
       );
-      return;
     }
 
-    const titleOverride = this.getTitleOverride(expectedGearId, activity);
-
-    if (activity.gear_id !== expectedGearId) {
+    if (expectedGearId && activity.gear_id !== expectedGearId) {
+      const titleOverride = this.getTitleOverride(expectedGearId, activity);
       await this.stravaDAL.updateGearOnActivity(
         activity,
         expectedGearId,
